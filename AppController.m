@@ -515,24 +515,29 @@ terminateApp:
 	
     if (newNotation) {
 		if (notationController) {
+			[notesTableView abortEditing];
+			[prefsController setLastSearchString:[self fieldSearchString] selectedNote:currentNote
+						scrollOffsetForTableView:notesTableView sender:self];
+			[notesTableView deselectAll:self];
+			[notesTableView setDataSource:nil];
+			[notesTableView setLabelsListSource:nil];
+			[notesTableView reloadData];
 			[notationController closeAllResources];
 			[[NSNotificationCenter defaultCenter] removeObserver:self name:SyncSessionsChangedVisibleStatusNotification
-														  object:[notationController syncSessionController]];
+													  object:[notationController syncSessionController]];
 		}
 		
 		NotationController *oldNotation = notationController;
 		notationController = [newNotation retain];
 		
 		if (oldNotation) {
-			[notesTableView abortEditing];
-			[prefsController setLastSearchString:[self fieldSearchString] selectedNote:currentNote
-						scrollOffsetForTableView:notesTableView sender:self];
 			//if we already had a notation, appController should already be bookmarksController's delegate
 			[[prefsController bookmarksController] performSelector:@selector(updateBookmarksUI) withObject:nil afterDelay:0.0];
 		}
 		[notationController setSortColumn:[notesTableView noteAttributeColumnForIdentifier:[prefsController sortedTableColumnKey]]];
 		[notesTableView setDataSource:[notationController notesListDataSource]];
 		[notesTableView setLabelsListSource:[notationController labelsListDataSource]];
+		[notesTableView reloadData];
 		[notationController setDelegate:self];
 		
 		//allow resolution of UUIDs to NoteObjects from saved searches
