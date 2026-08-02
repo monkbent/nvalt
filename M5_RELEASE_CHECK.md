@@ -59,3 +59,33 @@ Real-library use remains an explicit later gate. Follow
 whole-directory backup, rehearse restore, open a disposable copy first, and
 retain the Intel application for recoverable rollback. Do not open the original
 library until Ben explicitly accepts the candidate.
+
+## Notarization Addendum
+
+Ben subsequently requested that the personal release use Developer ID signing
+and Apple notarization. The original ad-hoc package remains preserved for build
+provenance, but it is superseded by:
+
+- Package: `nvALT-2.2.8-arm64-personal-notarized-20260802.zip`
+- Signing identity: `Developer ID Application: Benjamin Thompson (9EH72745H3)`
+- Team ID: `9EH72745H3`
+- Signing options: hardened runtime and secure timestamp, applied inside-out to
+  embedded MultiMarkdown and then the application bundle
+- Notarization submission: `29919731-51a0-4c1f-b758-52e20c67b486`
+- Apple status: `Accepted`
+- Ticket: stapled and successfully validated
+- Gatekeeper: accepted with source `Notarized Developer ID`
+- Integrity: strict deep `codesign` verification passed after stapling
+
+Claude's amendment to the post-signing plan limited re-verification to the
+hardened-runtime-sensitive subset. The stapled application launched from the
+notarized artifact directory using disposable data only. Its floating preview
+window exposed rendered HTML containing an `H1` heading and processed body,
+proving the Developer ID-signed MultiMarkdown subprocess launched and returned
+output under hardened runtime. A fresh low-iteration encrypted fixture copy
+unlocked with the public fixture passphrase; a unique marker entered through
+real keyboard events persisted through an immediate quit, passphrase-protected
+relaunch, and clean final quit. No entitlement was required.
+
+The real notes library was not opened. The backup, copy-first acceptance, and
+recoverable rollback gates in `REAL_LIBRARY_ROLLOUT.md` remain mandatory.

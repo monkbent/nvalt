@@ -1,31 +1,29 @@
 # nvALT Apple Silicon Real-Library Rollout
 
-The Apple Silicon package is a personal, ARM64-only build. It is ad-hoc signed,
-not notarized, and has no updater or synchronization service. Complete every
-copy and restore gate below before allowing it to open the original notes
-directory.
+The Apple Silicon package is a personal, ARM64-only build. It is Developer ID
+signed with hardened runtime, notarized by Apple, and stapled. It has no updater
+or synchronization service. Complete every copy and restore gate below before
+allowing it to open the original notes directory.
 
 ## Package Identity
 
-- Package: `nvALT-2.2.8-arm64-personal-20260802.zip`
+- Package: `nvALT-2.2.8-arm64-personal-notarized-20260802.zip`
 - Application identifier: `net.elasticthreads.nv`
 - Main executable: thin `arm64`
 - Embedded MultiMarkdown executable: universal `arm64` and `x86_64`; the thin
   ARM64 application launches its native ARM64 slice
-- Signature: ad-hoc; no Team ID
+- Signature: `Developer ID Application: Benjamin Thompson (9EH72745H3)`;
+  hardened runtime, secure timestamp, Apple notarization, and stapled ticket
 - Minimum deployment target: macOS 11.0
 - Source branch: `codex/apple-silicon-port`
-- Source commit: `1c14f5c`
+- Source commit: `b068c3a`
 
 Verify the downloaded or copied artifact against its adjacent `.sha256` file.
-An ad-hoc signature proves that the sealed bundle has not changed since it was
-signed, but it does not establish an Apple Developer identity. Consequently,
-`codesign --verify` passes while `spctl --assess` rejects this non-notarized
-personal build.
-
-If macOS warns on first launch, Control-click `nvALT.app` in Finder, choose
-**Open**, review the warning, and choose **Open** again. Do not disable
-Gatekeeper globally.
+The stapled ticket allows Gatekeeper to verify the notarization without a
+network connection. `codesign --verify --deep --strict` must pass, `xcrun
+stapler validate` must report success, and `spctl --assess --type execute` must
+accept the application with source `Notarized Developer ID`. Stop if any of
+these checks fails; do not bypass or disable Gatekeeper.
 
 ## 1. Record the Current Installation
 

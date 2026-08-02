@@ -20,6 +20,27 @@ Consequences:
   `x86_64` build used to separate modern-toolchain fixes from the ARM port.
 - A development or ad-hoc signature is acceptable for the first local package.
 
+## 2026-08-02: Notarize the Personal Build
+
+Decision: Version 1 will ship as a Developer ID-signed, hardened-runtime,
+notarized, and stapled personal build.
+
+Rationale: Ben explicitly requested a notarized release after Milestone 5. A
+notarized Developer ID build removes the per-application Gatekeeper override
+from the rollout and gives the artifact a verifiable Apple Developer identity.
+
+Consequences:
+
+- Sign the embedded MultiMarkdown executable and application bundle inside-out
+  with the Developer ID Application identity, hardened runtime, and a secure
+  timestamp.
+- Submit the signed application to Apple's notarization service and staple the
+  accepted ticket before packaging.
+- Re-run the packaged-app smoke matrix because hardened runtime changes the
+  executable's runtime policy.
+- This supersedes only the development/ad-hoc signing consequence of the
+  2026-08-01 personal-build decision; every other part of that decision stands.
+
 ## 2026-08-01: Disable Simplenote Synchronization
 
 Decision: Simplenote/Simperium synchronization will be disabled rather than
