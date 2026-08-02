@@ -177,7 +177,9 @@ compatibility fixtures. Cover at minimum:
 
 Exit criteria:
 
-- The main executable and every embedded executable are `arm64`.
+- The main executable is thin `arm64`; every launched embedded executable has
+  a native `arm64` slice. Unused Intel slices in otherwise unchanged upstream
+  tools do not block the personal package.
 - Activity Monitor reports Apple Silicon execution without Rosetta.
 - Both storage modes pass the agreed smoke matrix.
 - Encrypted fixtures and WAL recovery pass without data-integrity defects.
