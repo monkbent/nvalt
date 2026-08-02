@@ -22,6 +22,7 @@
 
 
 #import "GlobalPrefs.h"
+#import "BufferUtils.h"
 #import "NSData_transformations.h"
 #import "NotationPrefs.h"
 #import "BookmarksController.h"

@@ -50,13 +50,13 @@ static void SleepCallBack(void *refcon, io_service_t y, natural_t messageType, v
 
 + (NSArray*)allServiceNames {
 	static NSArray *allNames = nil;
-	if (!allNames) allNames = [[NSArray alloc] initWithObjects:SimplenoteServiceName, nil];
+	if (!allNames) allNames = [[NSArray alloc] init];
 	return allNames;
 }
 
 + (NSArray*)allServiceClasses {
 	static NSArray *allClasses = nil;
-	if (!allClasses) allClasses = [[NSArray alloc] initWithObjects:NSClassFromString(@"SimplenoteSession"), nil];
+	if (!allClasses) allClasses = [[NSArray alloc] init];
 	
 	return allClasses;
 }

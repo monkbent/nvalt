@@ -18,6 +18,7 @@
 #import <Cocoa/Cocoa.h>
 #include <SystemConfiguration/SystemConfiguration.h>
 #import <IOKit/IOMessage.h>
+#import <IOKit/pwr_mgt/IOPMLib.h>
 #import "SyncServiceSessionProtocol.h"
 
 @class NotationPrefs;
