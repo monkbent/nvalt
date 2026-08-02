@@ -215,6 +215,8 @@ Exit criteria:
 - Any new update mechanism.
 - Any new synchronization provider.
 - UI redesign or storage-format modernization.
+- Preserve and quarantine a non-empty WAL journal when recovery yields zero
+  objects instead of deleting it during journal reinitialization.
 
 ## Critical Risks
 

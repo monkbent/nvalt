@@ -401,7 +401,8 @@
     totalBytesRead += MAX(0, readBytes);
 	
     if (readBytes < (int)sizeof(WALRecordHeader)) {
-		NSLog(@"recoverNextObject can't even read (entire) log record header: %s", strerror(errno));
+		if (readBytes != 0)
+			NSLog(@"recoverNextObject can't even read (entire) log record header: %s", strerror(errno));
 		return nil;
     }
 	
