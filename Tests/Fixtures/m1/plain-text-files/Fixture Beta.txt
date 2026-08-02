@@ -1,0 +1,5 @@
+Second fixture note.
+
+Backlink to [[Fixture Alpha – Café 東京]].
+
+Trailing punctuation test: https://example.org/test).

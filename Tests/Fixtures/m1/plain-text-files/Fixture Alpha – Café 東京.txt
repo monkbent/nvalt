@@ -1,0 +1,8 @@
+# Fixture Alpha
+
+Unicode: Café, naïve, 東京, emoji 📝
+
+Link: https://example.com/path?q=nvalt
+Email: fixture@example.com
+
+**bold** and *italic* with [[Fixture Beta]].
