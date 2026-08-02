@@ -14,6 +14,12 @@ failure beside the test run.
 4. Launch nvALT and select only that temporary directory.
 5. Confirm the app reports the expected two baseline notes.
 
+When driving the editor through accessibility automation, confirm the
+`Interim Note-Changes` journal has been written before quitting. Setting an
+`NSTextView` accessibility value can update its visible contents before the
+automation has delivered the normal editing event that nvALT observes; this is
+a test-harness constraint and does not apply to keyboard input.
+
 ## Core Note Operations
 
 1. Create a note titled `Smoke Create` with a unique body marker.
@@ -63,7 +69,9 @@ failure beside the test run.
 3. Quit and repeat with `encrypted/high-iterations`.
 4. Enter a wrong passphrase once and confirm nvALT rejects it without changing
    the fixture.
-5. Verify both fixture checksums remain unchanged after the read-only test.
+5. On a separate disposable encrypted copy, edit a note with normal keyboard
+   input, quit immediately, relaunch, unlock, and confirm the edit persists.
+6. Verify both source fixture checksums remain unchanged after the tests.
 
 ## Crash Recovery
 
