@@ -8,10 +8,9 @@ cd "$repo_root"
 
 clang -arch x86_64 -fno-objc-arc -Wno-deprecated-declarations \
   -include Notation_Prefix.pch \
-  -I. -Ilibrary \
+  -I. \
   Tests/CryptoCompatibilityTests.m \
   NSData_transformations.m pbkdf2.c hmacsha1.c broken_md5.c idea_ossl.c \
-  libcrypto.a libssl.a \
   -framework Cocoa -framework WebKit -framework Carbon -lz \
   -o "$test_binary"
 
