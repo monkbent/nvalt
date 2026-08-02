@@ -50,6 +50,19 @@ enum {VERIFY_NOT_ATTEMPTED, VERIFY_FAILED, VERIFY_IN_PROGRESS, VERIFY_SUCCESS};
 			NSLog(@"Failed to load NotationPrefsView.nib");
 			return nil;
 		}
+
+		NSView *ancestor = syncAccountField;
+		while (ancestor && ![ancestor isKindOfClass:[NSTabView class]])
+			ancestor = [ancestor superview];
+		NSTabView *tabView = (NSTabView *)ancestor;
+		NSArray *tabItems = [[tabView tabViewItems] copy];
+		for (NSTabViewItem *tabItem in tabItems) {
+			if ([syncAccountField isDescendantOf:[tabItem view]]) {
+				[tabView removeTabViewItem:tabItem];
+				break;
+			}
+		}
+		[tabItems release];
     }
     
     return view;
@@ -460,7 +473,8 @@ enum {VERIFY_NOT_ATTEMPTED, VERIFY_FAILED, VERIFY_IN_PROGRESS, VERIFY_SUCCESS};
 		NSDictionary *login = [NSDictionary dictionaryWithObjectsAndKeys:
 							   [syncAccountField stringValue], @"username", [syncPasswordField stringValue], @"password", nil];
 
-		loginVerifier = [[SyncResponseFetcher alloc] initWithURL:loginURL POSTData:[[login jsonStringValue] dataUsingEncoding:NSUTF8StringEncoding] headers:headers contentType:@"application/json" delegate:self];
+		NSData *postData = [NSJSONSerialization dataWithJSONObject:login options:0 error:NULL];
+		loginVerifier = [[SyncResponseFetcher alloc] initWithURL:loginURL POSTData:postData headers:headers contentType:@"application/json" delegate:self];
 
 		[loginVerifier start];
 		[self setVerificationStatus:VERIFY_IN_PROGRESS withString:@""];

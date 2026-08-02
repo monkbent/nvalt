@@ -21,7 +21,6 @@
 #import "SyncResponseFetcher.h"
 #import "SimplenoteSession.h"
 #import "NSString_NV.h"
-#import "NSDictionary+BSJSONAdditions.h"
 #import "SynchronizedNoteProtocol.h"
 #import "NoteObject.h"
 #import "DeletedNoteObject.h"
@@ -142,7 +141,8 @@
 	
 	NSDictionary *rawObject = nil;
 	@try {
-		rawObject = [NSDictionary dictionaryWithJSONString:bodyString];
+		rawObject = [NSJSONSerialization JSONObjectWithData:[bodyString dataUsingEncoding:NSUTF8StringEncoding]
+													 options:0 error:NULL];
 	}
 	@catch (NSException *e) {
 		NSLog(@"Exception while parsing Simplenote JSON note object: %@", [e reason]);
@@ -312,7 +312,8 @@
 		}
 	}
 	NSDictionary *headers = [NSDictionary dictionaryWithObject:simperiumToken forKey:@"X-Simperium-Token"];
-	SyncResponseFetcher *fetcher = [[SyncResponseFetcher alloc] initWithURL:noteURL POSTData:[[rawObject jsonStringValue] dataUsingEncoding:NSUTF8StringEncoding] headers:headers contentType:@"application/json" delegate:self];
+	NSData *postData = [NSJSONSerialization dataWithJSONObject:rawObject options:0 error:NULL];
+	SyncResponseFetcher *fetcher = [[SyncResponseFetcher alloc] initWithURL:noteURL POSTData:postData headers:headers contentType:@"application/json" delegate:self];
 	[fetcher setRepresentedObject:aNote];
 	return [fetcher autorelease];
 }
@@ -342,7 +343,7 @@
 	//in keeping with nv's behavior with sn api1, deleting only marks a note as deleted.
 	//may want to implement actual purging (using HTTP DELETE) in the future
 	NSURL *noteURL = [SimplenoteSession simperiumURLWithPath:[NSString stringWithFormat:@"/Note/i/%@", [info objectForKey:@"key"]] parameters:nil];
-	NSData *postData = [[[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:1] forKey:@"deleted"] jsonStringValue] dataUsingEncoding:NSUTF8StringEncoding];
+	NSData *postData = [NSJSONSerialization dataWithJSONObject:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:1] forKey:@"deleted"] options:0 error:NULL];
 	NSDictionary *headers = [NSDictionary dictionaryWithObject:simperiumToken forKey:@"X-Simperium-Token"];
 	SyncResponseFetcher *fetcher = [[SyncResponseFetcher alloc] initWithURL:noteURL POSTData:postData headers:headers contentType:@"application/json" delegate:self];
 	[fetcher setRepresentedObject:aDeletedNote];
@@ -389,7 +390,8 @@
 	
 	NSDictionary *rawObject = nil;
 	@try {
-		rawObject = [NSDictionary dictionaryWithJSONString:bodyString];
+		rawObject = [NSJSONSerialization JSONObjectWithData:[bodyString dataUsingEncoding:NSUTF8StringEncoding]
+													 options:0 error:NULL];
 	}
 	@catch (NSException *e) {
 		NSLog(@"Exception while parsing Simplenote JSON note object: %@", [e reason]);
