@@ -50,19 +50,6 @@ enum {VERIFY_NOT_ATTEMPTED, VERIFY_FAILED, VERIFY_IN_PROGRESS, VERIFY_SUCCESS};
 			NSLog(@"Failed to load NotationPrefsView.nib");
 			return nil;
 		}
-
-		NSView *ancestor = syncAccountField;
-		while (ancestor && ![ancestor isKindOfClass:[NSTabView class]])
-			ancestor = [ancestor superview];
-		NSTabView *tabView = (NSTabView *)ancestor;
-		NSArray *tabItems = [[tabView tabViewItems] copy];
-		for (NSTabViewItem *tabItem in tabItems) {
-			if ([syncAccountField isDescendantOf:[tabItem view]]) {
-				[tabView removeTabViewItem:tabItem];
-				break;
-			}
-		}
-		[tabItems release];
     }
     
     return view;

@@ -15,6 +15,7 @@
    - Neither the name of Notational Velocity nor the names of its contributors may be used to endorse 
      or promote products derived from this software without specific prior written permission. */
 
+#import "SimperiumConfig.h"
 #import "SimplenoteSession.h"
 #import "SyncResponseFetcher.h"
 #import "SimplenoteEntryCollector.h"
@@ -36,9 +37,7 @@ NSString *SimplenoteServiceName = @"SN";
 NSString *SimplenoteSeparatorKey = @"SepStr";
 #define kSimplenoteSessionIndexBatchSize 100
 
-// Sync is disabled for the personal Apple Silicon build. Keep the symbol so
-// dormant Simplenote code still compiles without a private configuration file.
-NSString * const kSimperiumAPIKey = @"";
+NSString * const kSimperiumAPIKey = kSimperiumAPIKeyString;
 
 @implementation SimplenoteSession
 
