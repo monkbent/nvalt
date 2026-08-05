@@ -7,7 +7,7 @@ and restore gate below before allowing it to open the original notes directory.
 
 ## Package Identity
 
-- Package: `nvALT-2.2.8-arm64-personal-notarized-20260802.zip`
+- Package: `nvALT-2.2.8-arm64-personal-notarized-sync-20260804.zip`
 - Application identifier: `net.elasticthreads.nv`
 - Main executable: thin `arm64`
 - Embedded MultiMarkdown executable: universal `arm64` and `x86_64`; the thin
@@ -16,7 +16,7 @@ and restore gate below before allowing it to open the original notes directory.
   hardened runtime, secure timestamp, Apple notarization, and stapled ticket
 - Minimum deployment target: macOS 11.0
 - Source branch: `codex/apple-silicon-port`
-- Source commit: `b068c3a`
+- Application source commit: `f850103`
 
 Verify the downloaded or copied artifact against its adjacent `.sha256` file.
 The stapled ticket allows Gatekeeper to verify the notarization without a
@@ -153,6 +153,15 @@ attributes together.
    - one disposable create/edit/rename/delete cycle;
    - quit/relaunch persistence; and
    - preview rendering.
+
+   If changing the disposable copy from single-database storage to separate
+   plain-text files, treat the conversion as its own gate before testing sync.
+   Confirm the note count, every full body, representative Unicode and emoji,
+   and each title-to-filename mapping. The August 4, 2026 packaged-build test
+   converted four notes without loss and then passed server rename, server
+   deletion, and external-file-edit synchronization. That clean result supports
+   conversion on a disposable copy; it does not make conversion of the original
+   library an in-place first step.
 
 6. On a locally controlled Mac where a temporary network disconnect cannot
    strand a remote session, perform one manual offline reconciliation check:
