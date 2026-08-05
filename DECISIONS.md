@@ -58,6 +58,57 @@ Consequences:
   migration.
 - Remove sync-only JSON code once no live path depends on it.
 
+## 2026-08-04: Restore Simplenote Synchronization for Personal Version 1
+
+Decision: Restore the legacy Simplenote/Simperium integration for Ben's
+personal Apple Silicon build. This decision supersedes the 2026-08-01 decision
+to disable synchronization; its rationale was invalidated when the existing
+private application key and live service were verified.
+
+Rationale: The original Simperium application remains operational. Controlled
+ARM testing passed create/edit round trips, deletion propagation in both
+directions, and quit/relaunch reconciliation without missing or duplicated
+notes. The existing integration can therefore remain part of the personal port
+without replacing its protocol or data model.
+
+Consequences:
+
+- Supply the private Simperium application key through an uncommitted local
+  build setting; never commit or print the key.
+- Preserve the legacy local-first data path and Simperium synchronization
+  implementation rather than introducing a new provider in version 1.
+- Treat authentication attempts as scarce. The session token is memory-only,
+  so every application launch reauthorizes with the Keychain-stored password;
+  the Notes preference verifier makes a separate authorization request. This
+  is legacy Intel behavior, not an Apple Silicon regression.
+- Avoid repeated relaunches, repeated credential edits, and sync-toggle test
+  loops. Stop after any authorization block instead of retrying.
+- Apply the separately recorded concurrent-tag limitation.
+
+## 2026-08-04: Accept Concurrent Tag Conflicts in Personal Version 1
+
+Decision: Version 1 will not add new merge behavior for simultaneous tag edits
+made by different Simplenote clients. Tags are an atomic array in the legacy
+protocol, so a concurrent update can preserve one client's tag set and replace
+the other. Ben does not use tags, and the personal version will document this
+limitation instead of changing legacy conflict semantics during the ARM port.
+
+Rationale: Controlled testing found a tag-only conflict divergence between
+builds, but did not establish whether it was port-introduced or timing-sensitive.
+Source review isolates the behavior from note-body merging, which uses
+Simperium transforms, and deletion propagation, which uses a separate
+`{"deleted":1}` payload. Adding tag-union logic would create behavior neither
+legacy build guarantees and could resurrect tags a user intentionally removed.
+
+Consequences:
+
+- Do not concurrently edit a note's tags on multiple clients.
+- Treat a tag-array conflict as last-writer/whole-field behavior; verify tags
+  manually after any accidental concurrent tag edits.
+- Do not describe this decision as evidence of body-content or deletion loss.
+- Revisit tag conflict semantics only if tags become part of Ben's workflow or
+  a future public release defines a deliberate merge policy.
+
 ## 2026-08-01: Remove Sparkle
 
 Decision: Remove Sparkle and the existing update UI instead of upgrading or

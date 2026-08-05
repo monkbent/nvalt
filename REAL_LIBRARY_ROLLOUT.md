@@ -2,8 +2,8 @@
 
 The Apple Silicon package is a personal, ARM64-only build. It is Developer ID
 signed with hardened runtime, notarized by Apple, and stapled. It has no updater
-or synchronization service. Complete every copy and restore gate below before
-allowing it to open the original notes directory.
+and retains the legacy Simplenote synchronization service. Complete every copy
+and restore gate below before allowing it to open the original notes directory.
 
 ## Package Identity
 
@@ -38,6 +38,40 @@ these checks fails; do not bypass or disable Gatekeeper.
 5. Quit nvALT and confirm no nvALT process remains. Never run the Intel and ARM
    applications concurrently because they share preferences, cache, and WAL
    locations.
+
+   This is not only a simultaneous-write hazard. Every copy uses the same
+   machine-wide `net.elasticthreads.nv` preferences domain, so changing a sync
+   setting in one build changes what another build does at its next launch. In
+   testing on August 3, 2026, enabling Simplenote in the current test build
+   caused an older sync-hidden artifact to start its still-compiled login
+   verifier when its Notes preferences loaded; that old artifact later crashed
+   in the verifier callback. Quit one build completely before opening another,
+   and do not treat application renaming or a different application path as
+   isolation.
+
+### Simplenote Tag Limitation
+
+If synchronization is enabled in the accepted package, do not edit a note's
+tags concurrently on multiple clients. Simperium represents tags as one atomic
+array, so competing updates can preserve one client's complete tag set and
+replace the other. The personal version deliberately does not invent tag-union
+behavior: unioning could restore a tag that another client intentionally
+removed. Ben does not use tags, and this limitation is isolated from
+transform-merged note bodies and the separate deletion-tombstone path.
+
+### Simplenote Authentication Behavior
+
+The legacy Simperium access token exists only in the running nvALT process; it
+is not persisted. Every nvALT launch therefore reauthorizes using the
+Keychain-stored Simplenote password. Opening or re-enabling synchronization in
+the Notes preferences can also run a separate credential verifier whose token
+is not reused by the sync session. This matches the Intel source and is not an
+Apple Silicon regression, but bursts of relaunches, credential edits, or
+sync-toggle testing can trigger service-side abuse protection.
+
+Use one running session for routine work. If authorization starts timing out or
+is blocked, stop retrying and allow a cooldown or contact Automattic. Do not
+work around a block with token injection, routing changes, or repeated logins.
 
 ## 2. Create and Verify a Complete Backup
 
@@ -120,8 +154,23 @@ attributes together.
    - quit/relaunch persistence; and
    - preview rendering.
 
-6. Quit the ARM build. Verify the original directory's manifest has not changed.
-7. Stop on any missing, duplicated, renamed, unreadable, or unexpectedly
+6. On a locally controlled Mac where a temporary network disconnect cannot
+   strand a remote session, perform one manual offline reconciliation check:
+
+   1. Wait until nvALT is idle and create two disposable synced notes.
+   2. Turn off the Mac's active network connection.
+   3. Edit the first note locally and leave nvALT running.
+   4. From another already-authenticated Simplenote client, edit the second
+      note remotely.
+   5. Restore the Mac's network connection and wait for synchronization.
+   6. Verify the local edit reached the service, the remote edit reached nvALT,
+      neither note was duplicated, and no unrelated note changed.
+
+   Stop immediately on any missing, duplicated, or overwritten content. Run
+   this check once; do not repeatedly toggle synchronization or relaunch nvALT.
+
+7. Quit the ARM build. Verify the original directory's manifest has not changed.
+8. Stop on any missing, duplicated, renamed, unreadable, or unexpectedly
    modified note. Preserve the failed copy and logs for diagnosis.
 
 ## 5. Explicit Real-Library Acceptance Gate
