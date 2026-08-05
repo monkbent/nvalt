@@ -47,6 +47,7 @@ static void _CopyItemWithSelectorFromMenu(NSMenu *destMenu, NSMenu *sourceMenu, 
     if ((self = [super initWithCoder:decoder])) {
 		
 		globalPrefs = [GlobalPrefs defaultPrefs];
+		[self setStyle:NSTableViewStylePlain];
       
     userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults registerDefaults: [NSDictionary dictionaryWithObjectsAndKeys: [NSNumber numberWithBool: NO], @"UseCtrlForSwitchingNotes", nil]];
