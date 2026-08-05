@@ -2536,6 +2536,15 @@ terminateApp:
 	[toolbar setDelegate:self];
 	[window setToolbarStyle:NSWindowToolbarStyleExpanded];
 	[window setToolbar:toolbar];
+	NSView *toolbarItemViewer = [dualSV superview];
+	if (toolbarItemViewer) {
+		NSRect toolbarItemBounds = [toolbarItemViewer bounds];
+		[field setAutoresizingMask:NSViewWidthSizable];
+		[dualSV setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
+		[dualSV setFrame:toolbarItemBounds];
+		[dualFieldItem setMinSize:NSMakeSize(50.0f, NSHeight(toolbarItemBounds))];
+		[dualFieldItem setMaxSize:NSMakeSize(FLT_MAX, NSHeight(toolbarItemBounds))];
+	}
 	
 	[window setShowsToolbarButton:NO];
 	titleBarButton = [[TitlebarButton alloc] initWithFrame:NSMakeRect(0, 0, 19.0, 19.0) pullsDown:YES];
@@ -2547,6 +2556,7 @@ terminateApp:
 
 - (void)setDualFieldInView {
 	NSView *dualSV = [field superview];
+	[field setAutoresizingMask:NSViewWidthSizable | NSViewMinYMargin];
     [dualSV setAutoresizesSubviews:YES];
     [dualSV setAutoresizingMask:NSViewWidthSizable|NSViewMinYMargin];
     //	BOOL dfIsVis = [self dualFieldIsVisible];
