@@ -7,7 +7,7 @@ and restore gate below before allowing it to open the original notes directory.
 
 ## Package Identity
 
-- Package: `nvALT-2.2.8-arm64-personal-notarized-sync-20260804.zip`
+- Package: `nvALT-2.2.8-arm64-personal-notarized-sync-20260805.zip`
 - Application identifier: `net.elasticthreads.nv`
 - Main executable: thin `arm64`
 - Embedded MultiMarkdown executable: universal `arm64` and `x86_64`; the thin
@@ -16,7 +16,7 @@ and restore gate below before allowing it to open the original notes directory.
   hardened runtime, secure timestamp, Apple notarization, and stapled ticket
 - Minimum deployment target: macOS 11.0
 - Source branch: `codex/apple-silicon-port`
-- Application source commit: `f850103`
+- Application source commit: `2a34e79`
 
 Verify the downloaded or copied artifact against its adjacent `.sha256` file.
 The stapled ticket allows Gatekeeper to verify the notarization without a

@@ -89,3 +89,7 @@ relaunch, and clean final quit. No entitlement was required.
 
 The real notes library was not opened. The backup, copy-first acceptance, and
 recoverable rollback gates in `REAL_LIBRARY_ROLLOUT.md` remain mandatory.
+
+The August 2 packages are preserved for provenance. The current adoptable
+package is the Simplenote-enabled notarized rebuild documented in
+`M6_SYNC_RELEASE_CHECK.md`, built from `2a34e79` and dated August 5, 2026.
