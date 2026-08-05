@@ -518,7 +518,6 @@ terminateApp:
 			[notesTableView abortEditing];
 			[prefsController setLastSearchString:[self fieldSearchString] selectedNote:currentNote
 						scrollOffsetForTableView:notesTableView sender:self];
-			[notesTableView deselectAll:self];
 			[notesTableView setDataSource:nil];
 			[notesTableView setLabelsListSource:nil];
 			[notesTableView reloadData];
