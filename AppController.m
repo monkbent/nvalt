@@ -2534,6 +2534,7 @@ terminateApp:
 	[toolbar setShowsBaselineSeparator:YES];
     [toolbar setSizeMode:NSToolbarSizeModeSmall];
 	[toolbar setDelegate:self];
+	[window setToolbarStyle:NSWindowToolbarStyleExpanded];
 	[window setToolbar:toolbar];
 	
 	[window setShowsToolbarButton:NO];
