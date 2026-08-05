@@ -12,6 +12,7 @@
 
 #import "HeaderViewWIthMenu.h"
 #import "NoteAttributeColumn.h"
+#import "NotesTableHeaderCell.h"
 
 
 @interface HeaderViewWithMenu (Private)
@@ -35,6 +36,20 @@
 - (void)resetCursorRects {
 	if (!isReloading) {
 		[super resetCursorRects];
+	}
+}
+
+- (void)drawRect:(NSRect)dirtyRect {
+	NotesTableHeaderCell *backgroundCell = [[[NotesTableHeaderCell alloc] initTextCell:@" "] autorelease];
+	[backgroundCell drawWithFrame:[self bounds] inView:self];
+
+	NSArray *columns = [[self tableView] tableColumns];
+	NSUInteger i;
+	for (i = 0; i < [columns count]; i++) {
+		NSRect headerRect = [self headerRectOfColumn:i];
+		if (NSIntersectsRect(dirtyRect, headerRect)) {
+			[[[columns objectAtIndex:i] headerCell] drawWithFrame:headerRect inView:self];
+		}
 	}
 }
 
@@ -99,4 +114,3 @@
 }
 
 @end
-

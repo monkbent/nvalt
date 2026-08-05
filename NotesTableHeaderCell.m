@@ -45,7 +45,11 @@ NSColor *tColor;
 }
 
 - (NSRect)drawingRectForBounds:(NSRect)theRect {
-	return NSIntegralRect(NSInsetRect(theRect, 6.0f, 1.0f));
+	NSRect drawingRect = NSInsetRect(theRect, 6.0f, 0.0f);
+	CGFloat titleHeight = ceil([[self attributedStringValue] size].height);
+	drawingRect.origin.y = floor(NSMidY(theRect) - titleHeight / 2.0f) + 2.0f;
+	drawingRect.size.height = titleHeight;
+	return NSIntegralRect(drawingRect);
 }
 
 - (NSRect)sortIndicatorRectForBounds:(NSRect)theRect{
