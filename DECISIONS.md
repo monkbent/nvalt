@@ -109,6 +109,35 @@ Consequences:
 - Revisit tag conflict semantics only if tags become part of Ben's workflow or
   a future public release defines a deliberate merge policy.
 
+## 2026-08-05: Deduplicate Incoming Simplenote Entries by Server Key
+
+Decision: Treat the Simperium note key as the unique identity before starting
+an added-note collector or constructing a local note. Collapse repeated index
+entries for one key to the entry with the greatest version, route a key that
+already exists locally through the update path, and reserve keys while an
+added-note collection is in flight. Create genuinely new notes using the
+user's current local storage format.
+
+Rationale: A live sync incident produced repeated local files with identical
+content and one remote identity. Source tracing found that released 2.2.8 code
+concatenates paginated index results and constructs a local `NoteObject` for
+every entry without a key-identity gate. The Apple Silicon folder-switch fix
+does not touch this path, and Restore only materialized already duplicated
+objects as numbered files. This is therefore a legacy synchronization defect
+exposed during the port, not an ARM-specific regression.
+
+Consequences:
+
+- Full and partial index passes share one key-based collection gate.
+- Repeated entries retain the greatest server version; title or content
+  equality never determines identity, so distinct keys remain distinct notes.
+- An existing or in-flight key cannot create another local object. A downstream
+  assertion guards the invariant that creation receives one valid key once.
+- Existing duplicate local objects are not deleted automatically. Cleanup is a
+  separate, reviewed operation after a fixed build passes live synchronization.
+- Live confirmation must preserve existing authenticated sessions and remain
+  deferred until the TCP path to `auth.simperium.com:443` recovers.
+
 ## 2026-08-01: Remove Sparkle
 
 Decision: Remove Sparkle and the existing update UI instead of upgrading or

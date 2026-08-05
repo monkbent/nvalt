@@ -56,6 +56,7 @@ extern NSString * const kSimperiumAPIKey;
 	NSMutableDictionary *queuedNoteInvocations;
 	
 	NSMutableSet *collectorsInProgress;
+	NSMutableSet *keysBeingCollected;
 	
 	//used to span multiple partial index fetches (when mark is present in response)
 	NSMutableArray *indexEntryBuffer;

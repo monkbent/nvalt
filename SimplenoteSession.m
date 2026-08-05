@@ -19,9 +19,11 @@
 #import "SimplenoteSession.h"
 #import "SyncResponseFetcher.h"
 #import "SimplenoteEntryCollector.h"
+#import "SimplenoteEntryDeduplication.h"
 #import "NSCollection_utils.h"
 #import "GlobalPrefs.h"
 #import "NotationPrefs.h"
+#import "NotationSyncServiceManager.h"
 #import "NSString_NV.h"
 #import "AttributedPlainText.h"
 #import "InvocationRecorder.h"
@@ -266,6 +268,7 @@ static void SNReachabilityCallback(SCNetworkReachabilityRef	target, SCNetworkCon
 		notesBeingModified = [[NSMutableSet alloc] init];
 		unsyncedServiceNotes = [[NSMutableSet alloc] init];
 		collectorsInProgress = [[NSMutableSet alloc] init];
+		keysBeingCollected = [[NSMutableSet alloc] init];
         return self;
 	}
     return nil;
@@ -597,13 +600,39 @@ static void SNReachabilityCallback(SCNetworkReachabilityRef	target, SCNetworkCon
 		[[invRecorder prepareWithInvocationTarget:self] startCollectingAddedNotesWithEntries:entries mergingWithNotes:notesToMerge];
 		[[self loginFetcher] startWithSuccessInvocation:[invRecorder invocation]];
 	} else {
+		NSArray *deduplicatedEntries = SimplenoteEntriesDeduplicatedByKey(entries);
+		NSMutableArray *collectionCandidates = [NSMutableArray arrayWithCapacity:[deduplicatedEntries count]];
+		NSMutableArray *existingNotesToUpdate = [NSMutableArray array];
+
+		for (NSDictionary *entry in deduplicatedEntries) {
+			NSString *key = [entry objectForKey:@"key"];
+			NoteObject *existingNote = [delegate noteForKey:key ofServiceClass:[self class]];
+			if (existingNote) {
+				NSDictionary *localEntry = [[existingNote syncServicesMD] objectForKey:SimplenoteServiceName];
+				if ([self localEntry:localEntry compareToRemoteEntry:entry] == NSOrderedAscending) {
+					[existingNotesToUpdate addObject:existingNote];
+				} else {
+					[self applyMetadataUpdatesToNote:existingNote localEntry:localEntry remoteEntry:entry];
+				}
+				continue;
+			}
+			[collectionCandidates addObject:entry];
+		}
+		NSArray *entriesToCollect = SimplenoteEntriesToCollectByKey(collectionCandidates, keysBeingCollected);
+
+		if ([existingNotesToUpdate count]) {
+			[self startCollectingChangedNotesWithEntries:existingNotesToUpdate];
+		}
+		if (![entriesToCollect count]) {
+			return;
+		}
 		
 		//treat notesToMerge as notes being modified until the callback completes, 
 		//to ensure they're not added by a push while we fetch these remote entries
 		
 		if ([notesToMerge count]) [notesBeingModified addObjectsFromArray:notesToMerge];
 		
-		SimplenoteEntryCollector *collector = [[SimplenoteEntryCollector alloc] initWithEntriesToCollect:entries simperiumToken:simperiumToken];
+		SimplenoteEntryCollector *collector = [[SimplenoteEntryCollector alloc] initWithEntriesToCollect:entriesToCollect simperiumToken:simperiumToken];
 		[collector setRepresentedObject:notesToMerge];
 		[self _registerCollector:collector];
 		
@@ -752,6 +781,8 @@ static void SNReachabilityCallback(SCNetworkReachabilityRef	target, SCNetworkCon
 	//although notes that encountered errors normally (entriesInError w/o stopping) will potentially be duplicated anyway.
 	if ([collector collectionStoppedPrematurely]) {
 		NSLog(@"%@: not merging notes because collection was cancelled", NSStringFromSelector(_cmd));
+		[notesBeingModified minusSet:[NSSet setWithArray:[collector representedObject]]];
+		[self _unregisterCollector:collector];
 		return;
 	}
 	NSMutableArray *entries = [NSMutableArray arrayWithCapacity:[[collector entriesCollected] count]];
@@ -841,10 +872,14 @@ static void SNReachabilityCallback(SCNetworkReachabilityRef	target, SCNetworkCon
 
 - (NSArray*)_notesWithEntries:(NSArray*)entries {
 	NSMutableArray *newNotes = [NSMutableArray arrayWithCapacity:[entries count]];
+	NSMutableSet *seenKeys = [NSMutableSet setWithCapacity:[entries count]];
 	NSUInteger i = 0;
 	for (i=0; i<[entries count]; i++) {
 		NSDictionary *info = [entries objectAtIndex:i];
 		NSAssert(![info objectForKey:@"NoteObject"], @"this note is supposed to be new!");
+		NSString *entryKey = [info objectForKey:@"key"];
+		NSAssert([entryKey length] && ![seenKeys containsObject:entryKey], @"duplicate or missing Simplenote key reached note creation");
+		if ([entryKey length]) [seenKeys addObject:entryKey];
 		
 		NSString *fullContent = [info objectForKey:@"content"];
 		NSUInteger bodyLoc = 0;
@@ -857,7 +892,7 @@ static void SNReachabilityCallback(SCNetworkReachabilityRef	target, SCNetworkCon
 		[attributedBody addStrikethroughNearDoneTagsForRange:NSMakeRange(0, [attributedBody length])];
 		
 		NSString *labelString = [[info objectForKey:@"tags"] count] ? [[info objectForKey:@"tags"] componentsJoinedByString:@" "] : nil;
-		NoteObject *note = [[NoteObject alloc] initWithNoteBody:attributedBody title:title delegate:delegate format:SingleDatabaseFormat labels:labelString];
+		NoteObject *note = [[NoteObject alloc] initWithNoteBody:attributedBody title:title delegate:delegate format:[delegate currentNoteStorageFormat] labels:labelString];
 		if (note) {
 			NSNumber *modNum = [info objectForKey:@"modify"];
 			[note setDateAdded:[[info objectForKey:@"create"] doubleValue]];
@@ -880,6 +915,12 @@ static void SNReachabilityCallback(SCNetworkReachabilityRef	target, SCNetworkCon
 }
 
 - (void)_unregisterCollector:(SimplenoteEntryCollector*)collector {
+	for (id entry in [collector entriesToCollect]) {
+		if ([entry isKindOfClass:[NSDictionary class]]) {
+			NSString *key = [entry objectForKey:@"key"];
+			if ([key length]) [keysBeingCollected removeObject:key];
+		}
+	}
 	
 	[collectorsInProgress removeObject:[[collector retain] autorelease]];
 	
@@ -1277,6 +1318,7 @@ static void SNReachabilityCallback(SCNetworkReachabilityRef	target, SCNetworkCon
 	[listFetcher release];
 	[loginFetcher release];
 	[collectorsInProgress release];
+	[keysBeingCollected release];
 	[lastErrorString release];
 	
 	[super dealloc];
