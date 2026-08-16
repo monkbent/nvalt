@@ -5,8 +5,9 @@
 > One-line status: the port is **feature-complete and code-done** — a native
 > arm64, notarized, Simplenote-sync-enabled nvALT with all reviewed fixes on
 > `origin/codex/apple-silicon-port` (`596b390`). The **only** thing not finished
-> is the owner's real-library adoption on his MacBook Air, which is **blocked on
-> a Simplenote/Simperium auth throttle**, not on any code.
+> is the owner's real-library adoption on his MacBook Air. The auth throttle
+> that blocked it **cleared — owner-confirmed 2026-08-16**; adoption is now
+> owner-action-only.
 
 This repo is a maintained fork of `ttscoff/nv` (`github.com/monkbent/nvalt`).
 Working branch: **`codex/apple-silicon-port`**. Division of labor: Claude
@@ -76,13 +77,14 @@ bundle → "sealed resource missing"). Notary creds: keychain profile
 
 ## What remains (owner-gated)
 1. **Owner's real-library adoption on his MacBook Air**, per
-   `REAL_LIBRARY_ROLLOUT.md`. STATUS: **blocked on the auth throttle** (see
-   below). The clean method is a **single fresh sync in DATABASE mode** (not
+   `REAL_LIBRARY_ROLLOUT.md`. STATUS: **UNBLOCKED as of 2026-08-16** — owner
+   confirmed the auth endpoint is clean (the earlier "blocked" state was stale).
+   The clean method is a **single fresh sync in DATABASE mode** (not
    flat-files) into an empty library, then verify dates + no dupes.
 2. **One deferred LIVE full-initial-sync dup test** — belt-and-suspenders only;
    the offline integration test is the accepted proof.
 
-## Auth throttle (the blocker — critical to understand before resuming)
+## Auth throttle (cleared 2026-08-16 — history still critical before any retry)
 Simplenote's Simperium `auth.simperium.com` (`192.0.84.248`) abuse-throttles
 the owner's house IP after repeated logins; `api.simperium.com` (`.247`) stays
 fine. **nvALT's Simperium token is MEMORY-ONLY, so every launch re-authorizes**
@@ -111,14 +113,14 @@ clean attempt — do not retry-storm.**
 3. To rebuild/notarize: build `2a34e79` arm64 Release, Developer-ID sign
    inside-out, `xcrun notarytool submit --keychain-profile nvalt-notary --wait`,
    staple. (Owner must authorize the Apple upload each time.)
-4. For the Air adoption: wait for the throttle to clear (Codex runs a 5-min
-   TCP-only monitor on `auth.simperium.com:443`, reporting on radio
-   `nvalt-porting`), then walk the owner through: clear old nvALT cruft →
-   install the 20260805 build → launch → **stay in DB mode** → decline the
-   welcome-notes prompt → **one** clean sign-in → verify dates + no dupes.
+4. For the Air adoption (throttle cleared 2026-08-16): walk the owner through:
+   clear old nvALT cruft → install the 20260805 build (extract with `ditto`,
+   never `unzip`) → launch → **stay in DB mode** → decline the welcome-notes
+   prompt → **one** clean sign-in → verify dates + no dupes. Before signing in,
+   clean any leftover dupes on Simplenote web so the fresh pull is clean.
 
 ## In flight (Codex)
-- Codex is running a **5-minute TCP-only monitor** against `auth.simperium.com:443`
-  on radio channel **`nvalt-porting`**; when it reports recovery, that is the
-  signal to attempt the single clean DB-mode Air sync above. No code work is
-  pending — the branch and artifact are final.
+- **Nothing.** The 5-min TCP monitor Codex started 2026-08-06 went silent
+  (no radio messages after #162 despite the throttle clearing) — presumed dead
+  or stopped; stand-down sent on radio 2026-08-16. No code work is pending —
+  the branch and artifact are final.
