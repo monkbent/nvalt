@@ -1,5 +1,20 @@
 # Project Status & Handoff — nvALT Apple Silicon Port
 
+## Status
+
+The native Apple Silicon port is feature-complete, notarized, and adopted on the owner's MacBook Air; no code work is in flight.
+
+## Next steps
+
+- No required implementation remains.
+- If deliberately scheduled, run the deferred live full-initial-sync duplication test as an optional belt-and-suspenders check.
+
+## How to resume
+
+Read this document plus `DECISIONS.md`, `PORTING_PLAN.md`, and `REAL_LIBRARY_ROLLOUT.md`. Use the 2026-08-05 notarized artifact and avoid repeated Simperium authentication attempts.
+
+## Detailed record
+
 **As of 2026-08-16 (Claude review thread wound down).**
 
 > One-line status: the port is **feature-complete and code-done** — a native
